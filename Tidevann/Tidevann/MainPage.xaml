@@ -1,0 +1,193 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml" xmlns:local="clr-namespace:Tidevann"
+             x:Class="Tidevann.MainPage">
+
+
+    <!-- Hoved layout  -->
+    <StackLayout BackgroundColor="White">
+        
+        <!-- Overskrift i en frame  -->
+        <Frame BackgroundColor="#6bb4ee" 
+               Padding="5" 
+               CornerRadius="5" 
+               BorderColor="Gray"
+               HasShadow="True" 
+               HorizontalOptions="FillAndExpand">
+                <Label Text="Tidevann" 
+                   HorizontalOptions="FillAndExpand" 
+                   Padding="0" 
+                   HorizontalTextAlignment="Center" 
+                   TextColor="Black" 
+                   FontSize="36" 
+                   FontAttributes="Bold"
+                />
+        </Frame>
+
+        <!-- Skillelinje  -->
+        <BoxView VerticalOptions="Start" HeightRequest="1" Color="DarkGray"/>
+
+        <!-- Knappe linje i stacklayout orientert horisontalt-->
+        <StackLayout Orientation="Horizontal">
+            <StackLayout HorizontalOptions="FillAndExpand">
+                <ActivityIndicator x:Name="act" IsVisible="{Binding IsBusy}" IsRunning="{Binding IsBusy}" HorizontalOptions="FillAndExpand" />
+                <Button x:Name="gpsBtn"
+                    Text="GPS" 
+                    Clicked="GpsClick" 
+                    TextColor="Black" 
+                    FontSize="16" 
+                    Padding="0" 
+                    FontAttributes="Bold" 
+                    HorizontalOptions="FillAndExpand"
+                    BorderWidth="1" 
+                    BackgroundColor="#6bb4ee"
+                    BorderColor="Gray" 
+                    CornerRadius="5" 
+                />
+            </StackLayout>
+                <Button Text="Søk" 
+                    Clicked="SokClick" 
+                    TextColor="Black" 
+                    FontSize="16" 
+                    Padding="0" 
+                    FontAttributes="Bold" 
+                    HorizontalOptions="FillAndExpand"
+                    BorderWidth="1" 
+                    BackgroundColor="#6bb4ee"
+                    BorderColor="Gray" 
+                    CornerRadius="5" 
+            />
+            
+            <Button Text="?" 
+                    Clicked="HelpClick" 
+                    TextColor="Black" 
+                    FontSize="16" 
+                    Padding="0" 
+                    FontAttributes="Bold" 
+                    HorizontalOptions="FillAndExpand"
+                    BorderWidth="1" 
+                    BackgroundColor="#6bb4ee"
+                    BorderColor="Gray" 
+                    CornerRadius="5" 
+            />
+       
+        </StackLayout>
+
+        <!-- Skillelinje  -->
+        <BoxView VerticalOptions="Start" HeightRequest="1" Color="DarkGray"/>
+
+        <!-- Picker/loc-->
+
+        <Picker x:Name="LocationPicker"
+                Title="Velg sted!"
+                TitleColor="Black"
+                BackgroundColor="#6bb4ee"
+                FontAttributes="Bold"
+                >
+        
+        </Picker>
+
+        
+        
+        <!-- Skillelinje  -->
+        <BoxView VerticalOptions="Start" HeightRequest="1" Color="DarkGray"/>
+
+        <!-- ListView med Flo/fjære data  -->
+        <Frame BackgroundColor="#6bb4ee" Padding="5" CornerRadius="10" HasShadow="True" BorderColor="Gray" VerticalOptions="FillAndExpand" HorizontalOptions="FillAndExpand" >
+            <ListView x:Name="myListView" BackgroundColor="#6bb4ee" SeparatorColor="Black">
+            
+            <!-- Header -->
+            <ListView.Header>
+                <Frame CornerRadius="5"
+                       HasShadow="True"
+                       BackgroundColor="GhostWhite"
+                       BorderColor="DarkGray"
+                       HorizontalOptions="CenterAndExpand">
+                        <Label Text="Velg GPS, søk eller sted!"
+                               VerticalOptions="StartAndExpand"
+                               HorizontalOptions="Fill"
+                               FontSize="12"
+                               TextColor="Black"
+                               FontAttributes="Bold"
+                               BackgroundColor="GhostWhite"
+                               Padding="5"
+                        />
+                </Frame>
+            </ListView.Header>
+                
+            <!-- view celle template -->
+            <ListView.ItemTemplate>
+                <DataTemplate>
+                    <ViewCell>
+                        <ViewCell.View>
+                            <Frame BorderColor="DarkGray"
+                                   BackgroundColor="WhiteSmoke"
+                                   CornerRadius="5"
+                                   HasShadow="True"
+                                   Padding="2">
+                                    <StackLayout BackgroundColor="GhostWhite" 
+                                         Spacing="1"
+                                         Padding="2"
+                                         VerticalOptions="FillAndExpand" 
+                                         HorizontalOptions="FillAndExpand">
+                                        <Label Text="{Binding Dag}" 
+                                           FontSize="12" 
+                                           FontAttributes="Bold" 
+                                           TextColor="Black"
+                                           HorizontalTextAlignment="Start"/>
+                                        
+
+                                         <Label Text="{Binding Verdi}" 
+                                            FontSize="12" 
+                                            FontAttributes="Bold"
+                                            TextColor="Black"
+                                            VerticalTextAlignment="End"
+                                            VerticalOptions="End"
+                                            HorizontalTextAlignment="Start"                                    
+                                         />
+                                    </StackLayout>
+                                </Frame>
+                        </ViewCell.View>
+                    </ViewCell>
+                </DataTemplate>
+            </ListView.ItemTemplate>
+                
+            <!--Footer
+                <ListView.Footer>
+                    <Frame CornerRadius="5"
+                       HasShadow="True"
+                       BackgroundColor="WhiteSmoke"
+                       BorderColor="DarkGray"
+                       Padding="5"
+                       HorizontalOptions="CenterAndExpand">
+                        <Label x:Name="sluttPaListe2"
+                           Text="Slutt på listen"
+                           VerticalOptions="StartAndExpand"
+                           HorizontalOptions="Fill"
+                           FontSize="12"
+                           TextColor="Black"
+                           FontAttributes="Bold"
+                           BackgroundColor="GhostWhite"
+                           Padding="5"/>
+                    </Frame>
+                </ListView.Footer>
+                -->
+            </ListView>
+        </Frame>
+
+        <!-- Skillelinje  -->
+        <BoxView VerticalOptions="Start" HeightRequest="1" Color="DarkGray"/>
+
+        <!--Banner AD-->
+        <local:AdMobView AdUnitId="ca-app-pub-9083715345763117/4367512815" Grid.Row="4" Grid.ColumnSpan="2"
+                         BackgroundColor="LightGray"
+                         HeightRequest="80"
+                         WidthRequest="468"
+                         VerticalOptions="EndAndExpand"
+                         HorizontalOptions="FillAndExpand"/>
+        <!-- NB NB  Forandre AdUnitID ettersom test eller publish og droid/ios NB NB -->
+        <!-- ca-app-pub-9083715345763117/4367512815 Droid -->
+        <!-- ca-app-pub-3940256099942544/6300978111 test ad Droid-->
+    </StackLayout>
+
+</ContentPage>
