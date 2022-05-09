@@ -12,20 +12,20 @@ using Location = Tidevann.Models.Location;
 using Newtonsoft.Json;
 using System.Globalization;
 using System.Threading;
+using Tidevann.Data;
 
 namespace Tidevann
 {
     public partial class MainPage : ContentPage
     {
-        
+        // Using this httpclient for all api calls
         readonly HttpClient client = new HttpClient();
        
-        //private string lokasjon = "Lokasjon";
 
-        readonly List<Location> locList = new List<Location>();
-
-
+        // List of Tides/times that will be shown
         private List<TidevannModel> myTidevannModelList = new List<TidevannModel>();
+
+        // List of places when searching for a geografic location 
         private List<GeoStedModel> myGeoStedList = new List<GeoStedModel>();
        
 
@@ -33,10 +33,14 @@ namespace Tidevann
         {
             InitializeComponent();
             BindingContext = this;
-            CultureInfo.CurrentCulture = new CultureInfo("en-US");
-            // Loads predefined names/coords for the pickerlist
-            LoadLocs();
 
+            // Setting CultureInfo to en-US because of long and lat coordinates from API
+            CultureInfo.CurrentCulture = new CultureInfo("en-US");       
+
+            // Setting binding for the picker
+            LocationPicker.ItemDisplayBinding = new Binding("Name");
+            // Loads predefined names/coords for the pickerlist
+            LocationPicker.ItemsSource = StaticLocationRepository.LocList;
             // Adding select handler for the picker list
             LocationPicker.SelectedIndexChanged += SelectedLocChange;
         }
@@ -55,52 +59,7 @@ namespace Tidevann
 
         }
 
-        private void LoadLocs()
-        {
-            // Location names and coordiantes for the picker list
-            locList.Add(new Location("Vadsø", 70.08, 29.73));
-            locList.Add(new Location("Honningsvåg", 70.98, 25.97));
-            locList.Add(new Location("Tromsø", 69.69, 18.98));
-            locList.Add(new Location("Andøya", 69.08, 15.76));
-            locList.Add(new Location("Narvik", 68.44, 17.48));
-            locList.Add(new Location("Røst", 67.52, 12.11));
-            locList.Add(new Location("Bodø", 67.27, 14.44));
-            locList.Add(new Location("Sandnessjøen", 66.02, 12.62));
-            locList.Add(new Location("Brønnøysund", 65.48, 12.19));
-            locList.Add(new Location("Namsos", 64.46, 11.51));
-            locList.Add(new Location("Hitra", 63.56, 8.73));
-            locList.Add(new Location("Verdal", 63.79, 11.44));
-            locList.Add(new Location("Kristiansund", 63.11, 7.73));
-            locList.Add(new Location("Sunndalsøra", 62.68, 8.55));
-            locList.Add(new Location("Ålesund", 62.48, 6.14));
-            locList.Add(new Location("Måløy", 61.93, 5.10));
-            locList.Add(new Location("Florø", 61.59, 5.04));
-            locList.Add(new Location("Høyanger", 61.21, 6.07));
-            locList.Add(new Location("Gulen", 60.98, 5.08));
-            locList.Add(new Location("Bergen", 60.40, 5.31));
-            locList.Add(new Location("Bømlo", 59.80, 5.24));
-            locList.Add(new Location("Haugesund", 59.40, 5.27));
-            locList.Add(new Location("Stavanger", 58.97, 5.74));
-
-            //FJERN FLEKKEFJORD
-            locList.Add(new Location("Flekkefjord", 58.29, 6.66));
-
-
-            locList.Add(new Location("Lindesnes", 57.98, 7.05));
-            locList.Add(new Location("Kristiansand", 58.15, 8.03));
-            locList.Add(new Location("Arendal", 58.46, 8.78));
-            locList.Add(new Location("Kragerø", 58.86, 9.41));
-            locList.Add(new Location("Sandefjord", 59.13, 10.22));
-            locList.Add(new Location("Horten", 59.41, 10.48));
-            locList.Add(new Location("Oslo", 59.91, 10.73));
-            locList.Add(new Location("Fredrikstad", 59.21, 10.91));
-           
-
-            LocationPicker.ItemDisplayBinding = new Binding("Name");
-            LocationPicker.ItemsSource = locList;
-          
-        }
-
+       
        
         private async Task TestGPSAsync()
         {
@@ -283,7 +242,12 @@ namespace Tidevann
 
                     }
                     myListView.ItemsSource = myTidevannModelList;
+                    
                     myListView.ItemTapped += TideTapped;
+                    foreach(TidevannModel item in myListView.ItemsSource)
+                    {
+                        Debug.WriteLine(item.BColor);
+                    }
                 }
                 else
                 {

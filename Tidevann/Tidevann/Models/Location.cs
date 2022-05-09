@@ -2,7 +2,7 @@
 
 namespace Tidevann.Models
 {
-    class Location
+    public class Location
     {
         
         public string Name { get; set; }

@@ -121,32 +121,34 @@
                     <ViewCell>
                         <ViewCell.View>
                             <Frame BorderColor="DarkGray"
-                                   BackgroundColor="WhiteSmoke"
-                                   CornerRadius="5"
-                                   HasShadow="True"
-                                   Padding="2">
-                                    <StackLayout BackgroundColor="GhostWhite" 
-                                         Spacing="1"
-                                         Padding="2"
-                                         VerticalOptions="FillAndExpand" 
-                                         HorizontalOptions="FillAndExpand">
-                                        <Label Text="{Binding Dag}" 
-                                           FontSize="12" 
-                                           FontAttributes="Bold" 
-                                           TextColor="Black"
-                                           HorizontalTextAlignment="Start"/>
-                                        
+                                BackgroundColor="WhiteSmoke"
+                                CornerRadius="5"
+                                HasShadow="True"
+                                Padding="2">
 
-                                         <Label Text="{Binding Verdi}" 
-                                            FontSize="12" 
-                                            FontAttributes="Bold"
-                                            TextColor="Black"
-                                            VerticalTextAlignment="End"
-                                            VerticalOptions="End"
-                                            HorizontalTextAlignment="Start"                                    
-                                         />
-                                    </StackLayout>
-                                </Frame>
+                                    <StackLayout BackgroundColor="{Binding BColor}" 
+                                        Spacing="1"
+                                        Padding="2"
+                                        VerticalOptions="FillAndExpand" 
+                                        HorizontalOptions="FillAndExpand">
+
+                                    <Label Text="{Binding Dag}" 
+                                        FontSize="12" 
+                                        FontAttributes="Bold" 
+                                        TextColor="Black"
+                                        HorizontalTextAlignment="Start"/>
+
+
+                                    <Label Text="{Binding Verdi}" 
+                                        FontSize="12" 
+                                        FontAttributes="Bold"
+                                        TextColor="Black"
+                                        VerticalTextAlignment="End"
+                                        VerticalOptions="End"
+                                        HorizontalTextAlignment="Start"                                    
+                                        />
+                                </StackLayout>
+                            </Frame>
                         </ViewCell.View>
                     </ViewCell>
                 </DataTemplate>

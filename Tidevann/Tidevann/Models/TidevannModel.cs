@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Globalization;
+using Xamarin.Forms;
+
 namespace Tidevann.Models
 {
-    class TidevannModel
+    public class TidevannModel
     {
         private string verdi;
         private string flag;
@@ -11,6 +13,14 @@ namespace Tidevann.Models
 
         private string dag;
         private string klokke;
+
+        private Color bColor = Color.GhostWhite;
+
+        public Color BColor
+        {
+            get { return bColor; }
+            set { bColor = value; }
+        }
 
         public string Klokke
         {
@@ -48,14 +58,20 @@ namespace Tidevann.Models
                 datoTid = DateTime.Parse(value);
                 dag = datoTid.ToString("dddd", new CultureInfo("nb-No"));
                 klokke = datoTid.ToString("HH:mm");
-                if (datoTid.Day == DateTime.Today.Day)
+                if(datoTid < DateTime.Now)
                 {
-                    dag = Flag + " i dag/" + dag + " den " + datoTid.ToString("M") + " Klokken: "  + klokke;
+                    dag = "Det var " + Flag.ToLower() + ", " + dag + " den " + datoTid.ToString("M", new CultureInfo("nb-No")) + " Klokken: " + klokke;
+                    BColor = Color.IndianRed;
+                } else if(datoTid.Day == DateTime.Today.Day && datoTid >= DateTime.Now)
+                {
+                    dag = Flag + " i dag/" + dag + " den " + datoTid.ToString("M", new CultureInfo("nb-No")) + " Klokken: "  + klokke;
+                    BColor = Color.LightSeaGreen;
                 }
                 else
                 {
                     if(!string.IsNullOrEmpty(dag))
-                    dag = Flag + ", " + dag + " den " + datoTid.ToString("M") + " Klokken: " + klokke;
+                    dag = "Det blir " + Flag.ToLower() + ", " + dag + " den " + datoTid.ToString("M", new CultureInfo("nb-No")) + " Klokken: " + klokke;
+                    BColor = Color.LightSkyBlue;
                 }
                 tid = value; 
             }
