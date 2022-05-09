@@ -40,6 +40,7 @@
     <MandroidI18n>West</MandroidI18n>
     <AndroidSupportedAbis>
     </AndroidSupportedAbis>
+    <AndroidEnableMultiDex>true</AndroidEnableMultiDex>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugSymbols>false</DebugSymbols>

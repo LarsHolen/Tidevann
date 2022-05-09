@@ -152,26 +152,7 @@
                 </DataTemplate>
             </ListView.ItemTemplate>
                 
-            <!--Footer
-                <ListView.Footer>
-                    <Frame CornerRadius="5"
-                       HasShadow="True"
-                       BackgroundColor="WhiteSmoke"
-                       BorderColor="DarkGray"
-                       Padding="5"
-                       HorizontalOptions="CenterAndExpand">
-                        <Label x:Name="sluttPaListe2"
-                           Text="Slutt på listen"
-                           VerticalOptions="StartAndExpand"
-                           HorizontalOptions="Fill"
-                           FontSize="12"
-                           TextColor="Black"
-                           FontAttributes="Bold"
-                           BackgroundColor="GhostWhite"
-                           Padding="5"/>
-                    </Frame>
-                </ListView.Footer>
-                -->
+         
             </ListView>
         </Frame>
 
@@ -179,7 +160,7 @@
         <BoxView VerticalOptions="Start" HeightRequest="1" Color="DarkGray"/>
 
         <!--Banner AD-->
-        <local:AdMobView AdUnitId="ca-app-pub-9083715345763117/4367512815" Grid.Row="4" Grid.ColumnSpan="2"
+        <local:AdMobView AdUnitId="ca-app-pub-9083715345763117/4367512815" 
                          BackgroundColor="LightGray"
                          HeightRequest="80"
                          WidthRequest="468"

@@ -112,7 +112,9 @@ namespace Tidevann
             // trying to get cached gps position, since its a lot faster than getting a new
             try
             {
+
                 var location = await Geolocation.GetLastKnownLocationAsync();
+
 
                 if (location != null)
                 {
@@ -122,6 +124,7 @@ namespace Tidevann
                 }
                 else
                 {
+                    Debug.WriteLine("No pos found");
                     // No location found.  Trying to get a new pos, and catch possible errors in that method
                     GetNewPos();
                 }
@@ -156,6 +159,7 @@ namespace Tidevann
 
         private async void GetNewPos()
         {
+            Debug.WriteLine("Trying to get gps");
             // Trying to get a new GPS position, which can be slow.  Setting max time to 30 sec
             CancellationTokenSource cts;
             try
@@ -166,11 +170,13 @@ namespace Tidevann
                 if (geoLocation != null)
                 {
                     // Got a location, loading tide data
+                    Debug.WriteLine("Position: ", geoLocation.Latitude, geoLocation.Longitude);
                     TestApi(geoLocation.Latitude, geoLocation.Longitude);
                     GpsButtonOn(true);
                 }
                 else
                 {
+                    Debug.WriteLine("Position zero");
                     await DisplayAlert("Feil", "GPS data ikke funnet.", "Ok");
                     GpsButtonOn(true);
                 }
@@ -200,7 +206,7 @@ namespace Tidevann
                 Debug.WriteLine("**ex***" + ex.Message);
                 await DisplayAlert("Feil", "Greier ikke finne GPS data.", "Ok");
                 GpsButtonOn(true);
-            } 
+            }
         }
 
         private async void TestApi(double lan, double lon)
@@ -213,9 +219,9 @@ namespace Tidevann
                 myListView.ItemsSource = myTidevannModelList;
                 myListView.Header = MyHeader("Laster inn tidevanns data");
 
-                // Getting time now, and in 7 days, to retrive data for one week
-                DateTime now = DateTime.Now;
-                DateTime oneWeek = DateTime.Now.AddDays(7);
+                // Getting time for yesterday, and in 7 days, to retrive data for one week
+                DateTime now = DateTime.Now.Date.AddDays(-0.5);
+                DateTime oneWeek = DateTime.Now.AddDays(6);
                 string connectionString = "https://api.sehavniva.no/tideapi.php?lat=" + lan.ToString() + "&lon=" + lon.ToString() + "&fromtime=" + now.ToString("u") + "&totime=" + oneWeek.ToString("u") +"&datatype=tab&refcode=msl&place=&file=&lang=nn&interval=10&dst=0&tzone=&tide_request=locationdata";
                 
                 var respones = await client.GetAsync(connectionString);
