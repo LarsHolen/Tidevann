@@ -169,8 +169,8 @@
                          VerticalOptions="EndAndExpand"
                          HorizontalOptions="FillAndExpand"/>
         <!-- NB NB  Forandre AdUnitID ettersom test eller publish og droid/ios NB NB -->
-        <!-- ca-app-pub-9083715345763117/4367512815 Droid -->
-        <!-- ca-app-pub-3940256099942544/6300978111 test ad Droid-->
+        <!-- ca-app-pub-9083715345763117/4367512815 Droid ca-app-pub-9083715345763117/4367512815-->
+        <!-- ca-app-pub-3940256099942544/6300978111 test ad Droid -->
     </StackLayout>
 
 </ContentPage>

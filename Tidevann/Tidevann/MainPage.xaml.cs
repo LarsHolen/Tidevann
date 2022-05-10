@@ -20,14 +20,14 @@ namespace Tidevann
     {
         // Using this httpclient for all api calls
         readonly HttpClient client = new HttpClient();
-       
+
 
         // List of Tides/times that will be shown
         private List<TidevannModel> myTidevannModelList = new List<TidevannModel>();
 
         // List of places when searching for a geografic location 
         private List<GeoStedModel> myGeoStedList = new List<GeoStedModel>();
-       
+
 
         public MainPage()
         {
@@ -35,49 +35,67 @@ namespace Tidevann
             BindingContext = this;
 
             // Setting CultureInfo to en-US because of long and lat coordinates from API
-            CultureInfo.CurrentCulture = new CultureInfo("en-US");       
+            CultureInfo.CurrentCulture = new CultureInfo("en-US");
 
             // Setting binding for the picker
             LocationPicker.ItemDisplayBinding = new Binding("Name");
+
             // Loads predefined names/coords for the pickerlist
             LocationPicker.ItemsSource = StaticLocationRepository.LocList;
+
             // Adding select handler for the picker list
             LocationPicker.SelectedIndexChanged += SelectedLocChange;
         }
 
+
+        /// <summary>
+        /// Handler for when one select a location from the static list of locations
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void SelectedLocChange(object sender, EventArgs e)
         {
             // Select location from pickerlist, and loads data from TestApi
             Picker picker = sender as Picker;
             if (picker.SelectedItem == null) return;
             Location l = picker.SelectedItem as Location;
-           // picker.Title = l.Name + ", tap for å velge annet fra liste.";
+            // picker.Title = l.Name + ", tap for å velge annet fra liste.";
             double lan = l.Lan;
             double lon = l.Lon;
             TestApi(lan, lon);
             picker.SelectedItem = null;
-
         }
 
-       
-       
+        /// <summary>
+        /// Handler for when GPS is pressed
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private async void GpsClick(object sender, EventArgs e)
+        {
+            await TestGPSAsync();
+        }
+
+        /// <summary>
+        /// Trying to get a position from the GPS
+        /// </summary>
+        /// <returns></returns>
         private async Task TestGPSAsync()
         {
             // Trying to get a cached position
-            
+
             // Disabel the button, hide it and show activityindicator
             GpsButtonOn(false);
 
             // trying to get cached gps position, since its a lot faster than getting a new
             try
             {
-
                 var location = await Geolocation.GetLastKnownLocationAsync();
-
 
                 if (location != null)
                 {
                     // Got an location, start to load the tide info and reset the button 
+                    Debug.WriteLine("Positioning: " + location.Latitude.ToString() + " - "  + location.Longitude.ToString() + "...");
                     TestApi(location.Latitude, location.Longitude);
                     GpsButtonOn(true);
                 }
@@ -87,35 +105,20 @@ namespace Tidevann
                     // No location found.  Trying to get a new pos, and catch possible errors in that method
                     GetNewPos();
                 }
-                
-
-            }            
+            }
             catch (Exception ex)
             {
                 // Unable to get location, trying to get a new one
                 Debug.WriteLine("GPS cached error(loading new): " + ex.Message);
                 GetNewPos();
-            } 
-            
-        }
-
-        private void GpsButtonOn(bool v)
-        {
-            if(v)
-            {
-                act.IsRunning = false;
-                act.IsVisible = false;
-                gpsBtn.IsVisible = true;
-            } else
-            {
-                gpsBtn.IsVisible = false;
-                act.IsRunning = true;
-                act.IsVisible = true;
             }
-            
 
         }
 
+        /// <summary>
+        /// If getting a cached GPS pos fails, this func will try to activate and get a new pos from the GPS
+        /// Om en får feil, vises en feilmelding med DisplayAlert
+        /// </summary>
         private async void GetNewPos()
         {
             Debug.WriteLine("Trying to get gps");
@@ -168,23 +171,48 @@ namespace Tidevann
             }
         }
 
+        /// <summary>
+        /// Toggeling GPS button on off and set the activity indicator on/off
+        /// </summary>
+        /// <param name="v"></param>
+        private void GpsButtonOn(bool v)
+        {
+            if (v)
+            {
+                act.IsRunning = false;
+                act.IsVisible = false;
+                gpsBtn.IsVisible = true;
+            }
+            else
+            {
+                gpsBtn.IsVisible = false;
+                act.IsRunning = true;
+                act.IsVisible = true;
+            }
+        }
+
+        /// <summary>
+        /// Loading tide data from the API.
+        /// </summary>
+        /// <param name="lan"> breddegrader </param>
+        /// <param name="lon"> lengdegrader </param>
         private async void TestApi(double lan, double lon)
         {
             // Loads tide data from coordinates
             try
             {
                 // adding an custom item to the list that show "loading" text in the list
-                myTidevannModelList = new List<TidevannModel>();
+                myTidevannModelList.Clear();
                 myListView.ItemsSource = myTidevannModelList;
                 myListView.Header = MyHeader("Laster inn tidevanns data");
 
-                // Getting time for yesterday, and in 7 days, to retrive data for one week
-                DateTime now = DateTime.Now.Date.AddDays(-0.5);
-                DateTime oneWeek = DateTime.Now.AddDays(6);
-                string connectionString = "https://api.sehavniva.no/tideapi.php?lat=" + lan.ToString() + "&lon=" + lon.ToString() + "&fromtime=" + now.ToString("u") + "&totime=" + oneWeek.ToString("u") +"&datatype=tab&refcode=msl&place=&file=&lang=nn&interval=10&dst=0&tzone=&tide_request=locationdata";
-                
+                // Getting time for yesterday, and in 7 days, to retrive data for one week + yesterday
+                DateTime now = DateTime.Now.AddHours(-12);
+                DateTime oneWeek = DateTime.Now.AddDays(7);
+                string connectionString = "https://api.sehavniva.no/tideapi.php?lat=" + lan.ToString() + "&lon=" + lon.ToString() + "&fromtime=" + now.ToString("u") + "&totime=" + oneWeek.ToString("u") + "&datatype=tab&refcode=msl&place=&file=&lang=nn&interval=10&dst=0&tzone=&tide_request=locationdata";
+
                 var respones = await client.GetAsync(connectionString);
-                
+
 
                 respones.EnsureSuccessStatusCode();
 
@@ -192,7 +220,7 @@ namespace Tidevann
                 {
                     string responseContent = await respones.Content.ReadAsStringAsync();
                     // if responseContent contain the word "Beklager", we did not get any tide data.  Same with "Position outside area"
-                    if(responseContent.Contains("Beklager"))
+                    if (responseContent.Contains("Beklager"))
                     {
                         LocationPicker.Title = "Velg sted!";
                         responseContent = "";
@@ -200,7 +228,8 @@ namespace Tidevann
                         myListView.ItemsSource = myTidevannModelList;
                         myListView.Header = MyHeader("Det finnes ikke data for dette området, eller det mangler koordinater.");
                         return;
-                    } else if(responseContent.Contains("Position outside area"))
+                    }
+                    else if (responseContent.Contains("Position outside area"))
                     {
                         LocationPicker.Title = "Velg sted!";
                         myListView.Header = MyHeader("GPS er utenfor kartverkets dekning");
@@ -219,11 +248,11 @@ namespace Tidevann
                     XmlNodeList lcList = xDoc.GetElementsByTagName("location");
                     // picking the first element.  Should only be one, since we request tide data for only one location
                     XmlNode locEle = lcList.Item(0);
-                    
+
                     myListView.Header = MyHeader("Kartverkets tidevanns data for 7 dager");
-                    XmlNodeList tide  = xDoc.GetElementsByTagName("waterlevel");
+                    XmlNodeList tide = xDoc.GetElementsByTagName("waterlevel");
                     XmlNode docNode = xDoc.DocumentElement;
-                    if(docNode.OuterXml == "<error>Position outside area</error>")
+                    if (docNode.OuterXml == "<error>Position outside area</error>")
                     {
                         myListView.Header = MyHeader("Position utenfor APIens område/norskekysten, tap her for å velge fra liste.");
                         return;
@@ -231,7 +260,7 @@ namespace Tidevann
                     myTidevannModelList = new List<TidevannModel>();
                     foreach (XmlElement ti in tide)
                     {
-                        Debug.WriteLine("*******Høy/lav: " + ti.GetAttribute("flag") + "        Time: " + ti.GetAttribute("time") + "                 Vannnivå i forhold til middel:" + ti.GetAttribute("value"));
+                        //Debug.WriteLine("*******Høy/lav: " + ti.GetAttribute("flag") + "        Time: " + ti.GetAttribute("time") + "                 Vannnivå i forhold til middel:" + ti.GetAttribute("value"));
                         TidevannModel t = new TidevannModel()
                         {
                             Flag = ti.GetAttribute("flag"),
@@ -242,12 +271,11 @@ namespace Tidevann
 
                     }
                     myListView.ItemsSource = myTidevannModelList;
-                    
+
+                    myListView.ScrollTo(myListView.Header, ScrollToPosition.MakeVisible, false);
+
                     myListView.ItemTapped += TideTapped;
-                    foreach(TidevannModel item in myListView.ItemsSource)
-                    {
-                        Debug.WriteLine(item.BColor);
-                    }
+                    
                 }
                 else
                 {
@@ -273,7 +301,7 @@ namespace Tidevann
             };
             f.Content = new Label()
             {
-                Text =  s,
+                Text = s,
                 VerticalOptions = LayoutOptions.StartAndExpand,
                 HorizontalOptions = LayoutOptions.Fill,
                 FontSize = 12,
@@ -287,15 +315,15 @@ namespace Tidevann
 
         private void TideTapped(object sender, ItemTappedEventArgs e)
         {
-            if(e.Item is TidevannModel t)
+            if (e.Item is TidevannModel t)
             {
                 Debug.WriteLine("TidevannsModel item: " + t.Dag + " " + t.Flag + " " + t.Klokke + " " + t.Verdi);
             }
-           
+
         }
 
 
-     
+
 
         private async void HelpClick(object sender, EventArgs e)
         {
@@ -309,7 +337,7 @@ namespace Tidevann
         private async void SokClick(object sender, EventArgs e)
         {
             string stedsNavn = await DisplayPromptAsync("Søk", "Stedsnavn:");
-            if(!string.IsNullOrEmpty(stedsNavn)) GetLocNameFromGeodata(stedsNavn);
+            if (!string.IsNullOrEmpty(stedsNavn)) GetLocNameFromGeodata(stedsNavn);
         }
 
         private async void GetLocNameFromGeodata(string stedsNavn)
@@ -319,7 +347,9 @@ namespace Tidevann
             myGeoStedList = new List<GeoStedModel>();
             try
             {
-                string connectionString = "https://ws.geonorge.no/SKWS3Index/ssr/json/sok?navn=" + stedsNavn + "&maxAnt=10&eksakteForst=true&epsgKode=4258";
+                //string connectionString = "https://ws.geonorge.no/SKWS3Index/ssr/json/sok?navn=" + stedsNavn + "&maxAnt=10&eksakteForst=true&epsgKode=4258";
+                //string connectionString = "https://ws.geonorge.no/stedsnavn/v1/sted?sok=Svan%C3%B8y&fuzzy=true&utkoordsys=4258&treffPerSide=10&side=1";
+                string connectionString = "https://ws.geonorge.no/stedsnavn/v1/navn?sok=" + stedsNavn + "&fuzzy=true&utkoordsys=4258&treffPerSide=10&side=1&filtrer=navn.skrivem%C3%A5te%2Cnavn.navneobjekttype%2Cnavn.fylker.fylkesnavn%2Cnavn.representasjonspunkt.%C3%B8st%2Cnavn.representasjonspunkt.nord";
                 var respones = await client.GetAsync(connectionString);
                 respones.EnsureSuccessStatusCode();
 
@@ -338,19 +368,27 @@ namespace Tidevann
                     {
                         return;
                     }
-                    responseContent = responseContent.Replace("},{", "}|{");
-                    int pFrom = responseContent.IndexOf("[")+1;
-                    int pTo = responseContent.LastIndexOf("]");
-                    string result = responseContent.Substring(pFrom, pTo - pFrom);
-                    string[] resultList = result.Split(separator: '|');
-                    Debug.WriteLine("resultlist 0: " + resultList[0]);
-                    foreach (string sted in resultList)
+                        Rootobject root = JsonConvert.DeserializeObject<Rootobject>(responseContent);
+                        Debug.WriteLine("");
+                        Debug.WriteLine(root.navn[0].skrivemåte);
+                        Debug.WriteLine(root.navn[0].navneobjekttype);
+                        Debug.WriteLine(root.navn[0].fylker[0].fylkesnavn);
+                        Debug.WriteLine(root.navn[0].representasjonspunkt.nord.ToString());
+                        Debug.WriteLine(root.navn[0].representasjonspunkt.øst.ToString());
+                    foreach(var item in root.navn)
                     {
-                        GeoStedModel geoSted = JsonConvert.DeserializeObject<GeoStedModel>(sted);
+                        GeoStedModel geoSted = new GeoStedModel()
+                        {
+                            Stedsnavn = item.skrivemåte,
+                            Fylkesnavn = item.fylker[0].fylkesnavn,
+                            Lan = item.representasjonspunkt.øst.ToString(),
+                            Lon = item.representasjonspunkt.nord.ToString(),
+                            Navneobjekttype = item.navneobjekttype
+                        };
                         geoSted.SetPickerText();
                         myGeoStedList.Add(geoSted);
                     }
-                    //
+                    Debug.WriteLine("Resonse: " + Convert.ToDouble(myGeoStedList[0].Lon) + "      " + Convert.ToDouble(myGeoStedList[0].Lan));
                     if (myGeoStedList.Count != 0)
                     {
                         Picker picker = new Picker
@@ -366,8 +404,8 @@ namespace Tidevann
                             Debug.WriteLine("Selected: " + myGeoStedList[picker.SelectedIndex].Stedsnavn);
                             Debug.WriteLine("Resonse: " + myGeoStedList[picker.SelectedIndex].Lan + "      " + myGeoStedList[picker.SelectedIndex].Lon);
                             Debug.WriteLine("Resonse Doubles: " + double.Parse(myGeoStedList[picker.SelectedIndex].Lan, CultureInfo.InvariantCulture).ToString() + "      " + double.Parse(myGeoStedList[picker.SelectedIndex].Lon, CultureInfo.InvariantCulture).ToString());
-                            //Debug.WriteLine("Resonse: " + Convert.ToDouble(myGeoStedList[picker.SelectedIndex].Lan) + "      " + Convert.ToDouble(myGeoStedList[picker.SelectedIndex].Lon));
-                            TestApi(double.Parse(myGeoStedList[picker.SelectedIndex].Lan, CultureInfo.InvariantCulture), double.Parse(myGeoStedList[picker.SelectedIndex].Lon, CultureInfo.InvariantCulture));
+                            Debug.WriteLine("Resonse: " + Convert.ToDouble(myGeoStedList[picker.SelectedIndex].Lon) + "      " + Convert.ToDouble(myGeoStedList[picker.SelectedIndex].Lan));
+                            TestApi(double.Parse(myGeoStedList[picker.SelectedIndex].Lon, CultureInfo.InvariantCulture), double.Parse(myGeoStedList[picker.SelectedIndex].Lan, CultureInfo.InvariantCulture));
                             //picker.Unfocus();
                             //picker = null;
                             this.Content = bak;
@@ -377,26 +415,50 @@ namespace Tidevann
                         picker.Focus();
                         Debug.WriteLine("Resonse: " + responseContent);
                     }
-                    else 
+                    else
                     {
-                        
+                        await DisplayAlert("Info:", "Sted ikke funnet", "Ok");
                     }
 
-                   
+
                 }
 
-            } catch(Exception ex)
+            }
+            catch (Exception ex)
             {
                 Debug.WriteLine("Catching error from steds henting" + ex.Message);
                 await DisplayAlert("Info:", "Sted ikke funnet", "Ok");
             }
         }
 
-        private async void GpsClick(object sender, EventArgs e)
-        {
-            await TestGPSAsync();
-        }
 
-        
+
+
     }
+
+
+    public class Rootobject
+    {
+        public Navn[] navn { get; set; }
+    }
+
+    public class Navn
+    {
+        public string skrivemåte { get; set; }
+        public string navneobjekttype { get; set; }
+        public Fylker[] fylker { get; set; }
+        public Representasjonspunkt representasjonspunkt { get; set; }
+    }
+
+    public class Representasjonspunkt
+    {
+        public double øst { get; set; }
+        public double nord { get; set; }
+    }
+
+    public class Fylker
+    {
+        public string fylkesnavn { get; set; }
+    }
+
 }
