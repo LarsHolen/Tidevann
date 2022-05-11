@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android" android:versionCode="1" android:versionName="1.0 double Culturefix" package="com.larsholen.tidevann" android:installLocation="preferExternal">
-	<uses-sdk android:minSdkVersion="20" android:targetSdkVersion="30" />
-	<application android:label="Tidevann.Android" android:theme="@style/MainTheme" android:usesCleartextTraffic="true" android:icon="@mipmap/icon">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android" android:versionCode="2" android:versionName="2.0" package="com.larsholen.tidevann2" android:installLocation="preferExternal">
+	<uses-sdk android:minSdkVersion="26" android:targetSdkVersion="30" />
+	<application android:label="Tidevann" android:theme="@style/MainTheme" android:usesCleartextTraffic="true" android:icon="@mipmap/icon">
 		<meta-data android:name="com.google.android.gms.ads.APPLICATION_ID" android:value="ca-app-pub-9083715345763117~4510983040" />
 		<receiver android:name="com.google.firebase.iid.FirebaseInstanceIdInternalReceiver" android:exported="false" />
 		<receiver android:name="com.google.firebase.iid.FirebaseInstanceIdReceiver" android:exported="true" android:permission="com.google.android.c2dm.permission.SEND">

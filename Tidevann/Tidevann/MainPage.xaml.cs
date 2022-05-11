@@ -297,19 +297,20 @@ namespace Tidevann
                 HasShadow = true,
                 BackgroundColor = Color.GhostWhite,
                 BorderColor = Color.DarkGray,
-                HorizontalOptions = LayoutOptions.CenterAndExpand
+                HorizontalOptions = LayoutOptions.CenterAndExpand,
+                Content = new Label()
+                {
+                    Text = s,
+                    VerticalOptions = LayoutOptions.StartAndExpand,
+                    HorizontalOptions = LayoutOptions.Fill,
+                    FontSize = 12,
+                    TextColor = Color.Black,
+                    FontAttributes = FontAttributes.Bold,
+                    BackgroundColor = Color.GhostWhite,
+                    Padding = 5
+                }
             };
-            f.Content = new Label()
-            {
-                Text = s,
-                VerticalOptions = LayoutOptions.StartAndExpand,
-                HorizontalOptions = LayoutOptions.Fill,
-                FontSize = 12,
-                TextColor = Color.Black,
-                FontAttributes = FontAttributes.Bold,
-                BackgroundColor = Color.GhostWhite,
-                Padding = 5
-            };
+            
             return f;
         }
 
@@ -347,8 +348,6 @@ namespace Tidevann
             myGeoStedList = new List<GeoStedModel>();
             try
             {
-                //string connectionString = "https://ws.geonorge.no/SKWS3Index/ssr/json/sok?navn=" + stedsNavn + "&maxAnt=10&eksakteForst=true&epsgKode=4258";
-                //string connectionString = "https://ws.geonorge.no/stedsnavn/v1/sted?sok=Svan%C3%B8y&fuzzy=true&utkoordsys=4258&treffPerSide=10&side=1";
                 string connectionString = "https://ws.geonorge.no/stedsnavn/v1/navn?sok=" + stedsNavn + "&fuzzy=true&utkoordsys=4258&treffPerSide=10&side=1&filtrer=navn.skrivem%C3%A5te%2Cnavn.navneobjekttype%2Cnavn.fylker.fylkesnavn%2Cnavn.representasjonspunkt.%C3%B8st%2Cnavn.representasjonspunkt.nord";
                 var respones = await client.GetAsync(connectionString);
                 respones.EnsureSuccessStatusCode();
@@ -368,52 +367,45 @@ namespace Tidevann
                     {
                         return;
                     }
-                        Rootobject root = JsonConvert.DeserializeObject<Rootobject>(responseContent);
-                        Debug.WriteLine("");
-                        Debug.WriteLine(root.navn[0].skrivemåte);
-                        Debug.WriteLine(root.navn[0].navneobjekttype);
-                        Debug.WriteLine(root.navn[0].fylker[0].fylkesnavn);
-                        Debug.WriteLine(root.navn[0].representasjonspunkt.nord.ToString());
-                        Debug.WriteLine(root.navn[0].representasjonspunkt.øst.ToString());
+                    
+                    Rootobject root = JsonConvert.DeserializeObject<Rootobject>(responseContent);
+      
                     foreach(var item in root.navn)
                     {
                         GeoStedModel geoSted = new GeoStedModel()
                         {
-                            Stedsnavn = item.skrivemåte,
-                            Fylkesnavn = item.fylker[0].fylkesnavn,
-                            Lan = item.representasjonspunkt.øst.ToString(),
-                            Lon = item.representasjonspunkt.nord.ToString(),
-                            Navneobjekttype = item.navneobjekttype
+                            Stedsnavn = item.Skrivemåte,
+                            Fylkesnavn = item.Fylker[0].Fylkesnavn,
+                            Lan = item.Representasjonspunkt.Øst.ToString(),
+                            Lon = item.Representasjonspunkt.Nord.ToString(),
+                            Navneobjekttype = item.Navneobjekttype
                         };
                         geoSted.SetPickerText();
                         myGeoStedList.Add(geoSted);
                     }
-                    Debug.WriteLine("Resonse: " + Convert.ToDouble(myGeoStedList[0].Lon) + "      " + Convert.ToDouble(myGeoStedList[0].Lan));
+
                     if (myGeoStedList.Count != 0)
                     {
                         Picker picker = new Picker
                         {
                             Title = "Velg sted(navn,kommune,fylke):",
-                            VerticalOptions = LayoutOptions.CenterAndExpand
+                            VerticalOptions = LayoutOptions.CenterAndExpand,
+                            ItemsSource = myGeoStedList,
+                            ItemDisplayBinding = new Binding("PickerText")
                         };
-                        picker.ItemDisplayBinding = new Binding("PickerText");
-                        picker.ItemsSource = myGeoStedList;
+
                         picker.SelectedIndexChanged += (sender, args) =>
                         {
-                            Debug.WriteLine("Selected: " + args.ToString());
-                            Debug.WriteLine("Selected: " + myGeoStedList[picker.SelectedIndex].Stedsnavn);
-                            Debug.WriteLine("Resonse: " + myGeoStedList[picker.SelectedIndex].Lan + "      " + myGeoStedList[picker.SelectedIndex].Lon);
-                            Debug.WriteLine("Resonse Doubles: " + double.Parse(myGeoStedList[picker.SelectedIndex].Lan, CultureInfo.InvariantCulture).ToString() + "      " + double.Parse(myGeoStedList[picker.SelectedIndex].Lon, CultureInfo.InvariantCulture).ToString());
-                            Debug.WriteLine("Resonse: " + Convert.ToDouble(myGeoStedList[picker.SelectedIndex].Lon) + "      " + Convert.ToDouble(myGeoStedList[picker.SelectedIndex].Lan));
                             TestApi(double.Parse(myGeoStedList[picker.SelectedIndex].Lon, CultureInfo.InvariantCulture), double.Parse(myGeoStedList[picker.SelectedIndex].Lan, CultureInfo.InvariantCulture));
-                            //picker.Unfocus();
-                            //picker = null;
+                            this.Content = bak;
+                        };
+                        picker.Unfocused += (sender, args) =>
+                        {
                             this.Content = bak;
                         };
 
                         this.Content = picker;
                         picker.Focus();
-                        Debug.WriteLine("Resonse: " + responseContent);
                     }
                     else
                     {
@@ -437,28 +429,12 @@ namespace Tidevann
     }
 
 
-    public class Rootobject
-    {
-        public Navn[] navn { get; set; }
-    }
+    
 
-    public class Navn
-    {
-        public string skrivemåte { get; set; }
-        public string navneobjekttype { get; set; }
-        public Fylker[] fylker { get; set; }
-        public Representasjonspunkt representasjonspunkt { get; set; }
-    }
+    
 
-    public class Representasjonspunkt
-    {
-        public double øst { get; set; }
-        public double nord { get; set; }
-    }
+    
 
-    public class Fylker
-    {
-        public string fylkesnavn { get; set; }
-    }
+    
 
 }
